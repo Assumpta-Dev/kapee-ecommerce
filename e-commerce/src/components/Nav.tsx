@@ -1,0 +1,145 @@
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import LoginModal from "./LoginModal";
+import { FaUser, FaHeart, FaShoppingBag, FaEnvelope, FaQuestionCircle, FaChevronDown, FaBlog, FaBars, FaSearch } from "react-icons/fa"; 
+
+
+function Navbar() {
+
+  const [openLogin, setOpenLogin] = useState(false);
+  return (
+    <nav className="navbar w-full  flex flex-wrap bg-blue-500 shadow-lg">
+      <div className="top-nav w-full flex justify-between text-white pt-4 pr-4 pl-4 border-b border-white pb-1">
+        <ul className="flex items-center w-full text-sm  gap-4 cursor-pointer">
+          <li className="flex text-center border-r border-white">
+            <Link to="/"></Link>
+          </li>
+          <li className="flex-2 text-center border-r border-white">
+            <Link to="/language" className="flex gap-2">
+              ENGLISH <FaChevronDown></FaChevronDown>{" "}
+            </Link>
+          </li>
+          <li className="flex-2 text-center border-r border-white">
+            <Link to="/dollar" className="flex gap-1">
+              $ DOLLAR <FaChevronDown></FaChevronDown>{" "}
+            </Link>
+          </li>
+          <li className=" flex-3 text-center border-r border-white">
+            <Link to="/"></Link>
+          </li>
+          <li className="flex-3 text-center border-r border-l border-white">
+            <Link to="/welcome">WELCOME TO OUR STORE! </Link>
+          </li>
+          <li className="flex-1 text-center border-r border-white">
+            <Link to="/blogs" className="flex gap-2">
+              <FaBlog></FaBlog>BLOG
+            </Link>
+          </li>
+          <li className="flex-1 text-center border-r border-white">
+            <Link to="/faq" className="flex gap-2">
+              <FaQuestionCircle></FaQuestionCircle>FAQ{" "}
+            </Link>
+          </li>
+          <li className="flex-2 text-center border-r border-white">
+            <Link to="/contact" className="flex gap-2">
+              <FaEnvelope></FaEnvelope>CONTACT US{" "}
+            </Link>
+          </li>
+          <li className="flex text-center border-r border-white">
+            <Link to="/"> </Link>
+          </li>
+        </ul>
+      </div>
+      <div className="flex md:flex-row items-center justify-between w-full m-2 space-x-10 text-white p-4">
+        <h3 className=" font-bold font-size-lg px-4 text-4xl">Kapee.</h3>
+        <div className="flex  w-lg p-2 rounded-4xl bg-white shadow-xl justify-between text-gray-500 text-sm cursor-pointer">
+          <div className="w-full flex flex-4 items-center gap-2 cursor-pointer">
+            Search for products, categories, brands....{" "}
+            <p className=" flex flex-2 items-center justify-between px-4 border-l border-r border-gray-300 min-h-[30px]">
+              All Categories <FaChevronDown></FaChevronDown>{" "}
+            </p>
+            <span className="flex p-2">
+              <FaSearch className="w-4 h-4 text-blue-500"></FaSearch>
+            </span>
+          </div>
+        </div>
+        {/* USER ICON */}
+        <button
+          onClick={() => setOpenLogin(true)}
+          className="text-white flex items-center gap-1 cursor-pointer"
+        >
+          <FaUser className="w-6 h-6" />
+        </button>
+
+        {/* LOGIN MODAL */}
+        {openLogin && <LoginModal onClose={() => setOpenLogin(false)} />}
+        <Link to="/add" className="text-white flex items-center">
+          <span>
+            {" "}
+            <FaHeart className="w-6 h-6"></FaHeart>
+          </span>
+        </Link>
+        <Link to="/cart" className="text-white flex items-center gap-1">
+          <span>
+            {" "}
+            <FaShoppingBag className="w-6 h-6"></FaShoppingBag>
+          </span>
+        </Link>
+      </div>
+
+      <div className="w-full flex justify-between bg-white">
+        <ul className="w-full flex items-center text-sm font-bold p-4 gap-4">
+          <li className="flex text-center border-r border-white ">
+            <Link to="/" className="flex gap-1"></Link>
+          </li>
+          <li className="flex text-center border-r border-l border-black min-h-[30px] px-4">
+            <Link to="/shop" className="flex gap-2">
+              SHOP BY DEPARTMENT{" "}
+              <FaBars className="text-gray-400"></FaBars>{" "}
+            </Link>
+          </li>
+          <li className="flex text-center border-r border-white">
+            <Link to="/#" className="flex gap-1">
+              HOME{" "}
+              <FaChevronDown className="text-gray-400"></FaChevronDown>{" "}
+            </Link>
+          </li>
+          <li className="flex text-center border-r border-white">
+            <Link to="/shop" className="flex gap-1">
+              SHOP
+              <FaChevronDown className=" text-gray-400"></FaChevronDown>{" "}
+            </Link>
+          </li>
+          <li className="flex text-center border-r border-white">
+            <Link to="/language" className="flex gap-1">
+              PAGES{" "}
+              <FaChevronDown className="text-gray-400"></FaChevronDown>{" "}
+            </Link>
+          </li>
+          <li className="flex text-center border-r border-white">
+            <Link to="/blogs" className="flex gap-1">
+              BLOG{" "}
+              <FaChevronDown className="text-gray-400"></FaChevronDown>{" "}
+            </Link>
+          </li>
+          <li className="flex text-center border-r border-white">
+            <Link to="/language" className="flex gap-1">
+              ELEMENTS{" "}
+              <FaChevronDown className="text-gray-400"></FaChevronDown>{" "}
+            </Link>
+          </li>
+          <li className="flex-1 text-center border-r border-white">
+            <Link to="/dollar" className="flex gap-1">
+              BUY NOW
+            </Link>
+          </li>
+        </ul>
+      </div>
+      {/* Mobile Menu Button */}
+      <div className="hidden md:flex  md:hidden">
+        <button className="text-white">☰</button>
+      </div>
+    </nav>
+  );
+}
+export default Navbar;
