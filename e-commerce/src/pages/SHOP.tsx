@@ -5,10 +5,6 @@ import{FaExchangeAlt, FaSearch} from "react-icons/fa"
 import { useNavigate } from "react-router-dom";
 import type { Product } from "../Model/product";
 
-
-
-
-
 export const shop: Product []= [
   { id:1, img: "/1 (25).jpg", tag: "Men's Fashion", title: "Premium Leather Casual Shoes", rate: 4, price: "$99" },
   { id: 2, img: "/1 (20).jpg", tag: "Female Bags", title: "Designer Handbag Collection", rate: 4, price: "$70" },
@@ -23,10 +19,9 @@ export const shop: Product []= [
   { id: 11, img: "/1 (23).jpg", tag: "Female Pant", title: "Wide Leg Palazzo Pants", rate: 4, price: "$55" },
   { id: 12, img: "/1 (51).jpg", tag: "Men's Fashion", title: "Men Hooded Navy Blue & Grey T-Shirt", rate: 5, price: "$39" },
 ];
+
 function SHOP(){
   const navigate = useNavigate();
- 
-
 
 return (
   <>
@@ -178,15 +173,7 @@ return (
                   />
 
                   {/* Hover actions */}
-                  <div
-                    className="
-    absolute inset-x-0 bottom-0
-    bg-blue-600 text-white
-    flex items-center justify-evenly px-4 py-3
-    translate-y-full group-hover:translate-y-0
-    transition-transform duration-300
-  "
-                  >
+                  <div className="absolute inset-x-0 bottom-0 bg-blue-600 text-white flex items-center justify-evenly px-4 py-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                     <span
                       className="flex items-center gap-2 text-sm font-semibold cursor-pointer"
                       onClick={() => navigate(`/product/${item.id}`)}
@@ -206,45 +193,16 @@ return (
 
                 {/* CONTENT */}
                 <div className="p-4 flex flex-col gap-2">
-                  <p className="text-xs text-gray-500 uppercase">{item.tag}</p>
-                  <p className="font-medium text-blue-600 hover:underline cursor-pointer">
-                    {item.title}
-                  </p>
-
-                  {/* Rating */}
+                  <p className="text-sm text-gray-500">{item.tag}</p>
+                  <h4 className="font-semibold text-gray-800">{item.title}</h4>
+                  
                   <div className="flex items-center gap-2">
-                    <span className="bg-green-600 text-white px-2 rounded text-xs flex items-center gap-1">
+                    <span className="bg-blue-500 text-white px-2 rounded text-sm">
                       {item.rate}
-                      <FaStar className="text-white" />
+                      <FaStar className="inline ml-1 mb-0.5" />
                     </span>
-                    <span className="text-gray-500 text-sm">(2)</span>
-                  </div>
-
-                  {/* Price */}
-                  <p className="text-lg font-semibold">
-                    {item.price}{" "}
-                    <span className="text-green-600 text-sm font-medium">
-                      19% Off
-                    </span>
-                  </p>
-
-                  {/* Colors (show on hover) */}
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="w-4 h-4 rounded-full bg-blue-600 border-2 border-blue-600"></span>
-                    <span className="w-4 h-4 rounded-full bg-gray-500"></span>
-                    <span className="w-4 h-4 rounded-full bg-red-800"></span>
-                  </div>
-
-                  {/* Sizes (show on hover) */}
-                  <div className="flex gap-3 text-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="w-8 h-8 flex items-center justify-center border rounded-full cursor-pointer hover:border-blue-600">
-                      S
-                    </span>
-                    <span className="w-8 h-8 flex items-center justify-center border rounded-full cursor-pointer hover:border-blue-600">
-                      M
-                    </span>
-                    <span className="w-8 h-8 flex items-center justify-center border rounded-full cursor-pointer hover:border-blue-600">
-                      L
+                    <span className="text-lg font-semibold text-gray-800">
+                      {item.price}
                     </span>
                   </div>
                 </div>
