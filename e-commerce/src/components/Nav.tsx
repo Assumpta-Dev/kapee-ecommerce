@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import LoginModal from "./LoginModal";
 import { FaUser, FaHeart, FaShoppingBag, FaEnvelope, FaQuestionCircle, FaChevronDown, FaBlog, FaBars, FaSearch } from "react-icons/fa"; 
+import { useCart } from "../context/Cart";
+
 
 
 function Navbar() {
-
+   const { totalQty, totalPrice, openCart } = useCart();
   const [openLogin, setOpenLogin] = useState(false);
   return (
     <nav className="navbar w-full  flex flex-wrap bg-blue-500 shadow-lg">
@@ -64,6 +66,7 @@ function Navbar() {
           </div>
         </div>
         {/* USER ICON */}
+
         <button
           onClick={() => setOpenLogin(true)}
           className="text-white flex items-center gap-1 cursor-pointer"
@@ -73,18 +76,37 @@ function Navbar() {
 
         {/* LOGIN MODAL */}
         {openLogin && <LoginModal onClose={() => setOpenLogin(false)} />}
-        <Link to="/add" className="text-white flex items-center">
-          <span>
-            {" "}
-            <FaHeart className="w-6 h-6"></FaHeart>
-          </span>
-        </Link>
-        <Link to="/cart" className="text-white flex items-center gap-1">
-          <span>
-            {" "}
-            <FaShoppingBag className="w-6 h-6"></FaShoppingBag>
-          </span>
-        </Link>
+        <div className="">
+          <Link to="/cart" className="relative text-white flex items-center">
+            <FaHeart className="w-6 h-6" />
+
+            {/* Cart count badge */}
+            <span className="absolute -top-2 -right-2 w-4 h-4 bg-blue-600 text-white text-xs font-semibold rounded-full shadow-lg flex items-center justify-center">
+              0
+            </span>
+          </Link>
+        </div>
+        <div className="">
+          <button
+            onClick={openCart}
+            className="text-white flex items-center gap-3 cursor-pointer"
+          >
+            <div className="relative">
+              <FaShoppingBag className="w-6 h-6" />
+
+              {totalQty > 0 && (
+                <span className="absolute -top-2 -right-2 w-4 h-4 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center">
+                  {totalQty}
+                </span>
+              )}
+            </div>
+
+            <div className="flex flex-col leading-tight">
+              <p className="text-sm">Cart</p>
+              <p className="font-bold text-lg">${totalPrice.toFixed(2)}</p>
+            </div>
+          </button>
+        </div>
       </div>
 
       <div className="w-full flex justify-between bg-white">

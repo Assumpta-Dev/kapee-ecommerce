@@ -26,17 +26,17 @@ const slides = [
 ];
 
 const images = [
-  { img: "./1 (8).jpg", tag: "Men's Fashion" },
-  { img: "./1 (1).jpg", tag: "Female Bags" },
-  { img: "./1 (2).jpg", tag: "Female pants" },
+  { img: "./1 (8).jpg", tag: "Men" },
+  { img: "./1 (1).jpg", tag: "Bags" },
+  { img: "./1 (2).jpg", tag: "pants" },
   { img: "./1 (3).jpg", tag: "Trouser" },
-  { img: "./1 (4).jpg", tag: "Party wear" },
-  { img: "./1 (5).jpg", tag: "Girl's shoes" },
+  { img: "./1 (4).jpg", tag: "Party" },
+  { img: "./1 (5).jpg", tag: "Shoes" },
   { img: "./1 (6).jpg", tag: "Men's complete" },
   { img: "./1 (31).jpg", tag: "Female shoes" },
   { img: "./1 (30).jpg", tag: "High hills" },
   { img: "./1 (16).jpg", tag: "Tops" },
-  { img: "./1 (14).jpg", tag: "Female Pant" },
+  { img: "./1 (14).jpg", tag: "Female Pants" },
   { img: "./1 (10).jpg", tag: "Men's Fashion" },
 ];
 const featured = [
@@ -187,7 +187,13 @@ const female = [
 
 function Home() {
   const [current, setCurrent] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const imagesScrollRef = useRef<HTMLDivElement>(null);
+  const featuredScrollRef = useRef<HTMLDivElement>(null);
+  const menScrollRef = useRef<HTMLDivElement>(null);
+  const femaleScrollRef = useRef<HTMLDivElement>(null);
+  const featured2ScrollRef = useRef<HTMLDivElement>(null);
+  const featured3ScrollRef = useRef<HTMLDivElement>(null);
+  const featured4ScrollRef = useRef<HTMLDivElement>(null);
 
   // Main slider auto
   useEffect(() => {
@@ -201,20 +207,134 @@ function Home() {
   const prevSlide = () =>
     setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
 
-  // Horizontal scroll by buttons
-  const scrollLeft = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({
-        left: -scrollRef.current.offsetWidth / 8, // scroll by 1 column width
+  // Images section scroll functions
+  const scrollImagesLeft = () => {
+    if (imagesScrollRef.current) {
+      imagesScrollRef.current.scrollBy({
+        left: -imagesScrollRef.current.offsetWidth / 8,
         behavior: "smooth",
       });
     }
   };
 
-  const scrollRight = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({
-        left: scrollRef.current.offsetWidth / 8,
+  const scrollImagesRight = () => {
+    if (imagesScrollRef.current) {
+      imagesScrollRef.current.scrollBy({
+        left: imagesScrollRef.current.offsetWidth / 8,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Featured products scroll functions
+  const scrollFeaturedLeft = () => {
+    if (featuredScrollRef.current) {
+      featuredScrollRef.current.scrollBy({
+        left: -featuredScrollRef.current.offsetWidth / 4,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollFeaturedRight = () => {
+    if (featuredScrollRef.current) {
+      featuredScrollRef.current.scrollBy({
+        left: featuredScrollRef.current.offsetWidth / 4,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Men fashion scroll functions
+  const scrollMenLeft = () => {
+    if (menScrollRef.current) {
+      menScrollRef.current.scrollBy({
+        left: -menScrollRef.current.offsetWidth / 3,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollMenRight = () => {
+    if (menScrollRef.current) {
+      menScrollRef.current.scrollBy({
+        left: menScrollRef.current.offsetWidth / 3,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Female fashion scroll functions
+  const scrollFemaleLeft = () => {
+    if (femaleScrollRef.current) {
+      femaleScrollRef.current.scrollBy({
+        left: -femaleScrollRef.current.offsetWidth / 3,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollFemaleRight = () => {
+    if (femaleScrollRef.current) {
+      femaleScrollRef.current.scrollBy({
+        left: femaleScrollRef.current.offsetWidth / 3,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Featured 2 scroll functions
+  const scrollFeatured2Left = () => {
+    if (featured2ScrollRef.current) {
+      featured2ScrollRef.current.scrollBy({
+        left: -featured2ScrollRef.current.offsetWidth / 4,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollFeatured2Right = () => {
+    if (featured2ScrollRef.current) {
+      featured2ScrollRef.current.scrollBy({
+        left: featured2ScrollRef.current.offsetWidth / 4,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Featured 3 scroll functions
+  const scrollFeatured3Left = () => {
+    if (featured3ScrollRef.current) {
+      featured3ScrollRef.current.scrollBy({
+        left: -featured3ScrollRef.current.offsetWidth / 4,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollFeatured3Right = () => {
+    if (featured3ScrollRef.current) {
+      featured3ScrollRef.current.scrollBy({
+        left: featured3ScrollRef.current.offsetWidth / 4,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Featured 4 scroll functions
+  const scrollFeatured4Left = () => {
+    if (featured4ScrollRef.current) {
+      featured4ScrollRef.current.scrollBy({
+        left: -featured4ScrollRef.current.offsetWidth / 4,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollFeatured4Right = () => {
+    if (featured4ScrollRef.current) {
+      featured4ScrollRef.current.scrollBy({
+        left: featured4ScrollRef.current.offsetWidth / 4,
         behavior: "smooth",
       });
     }
@@ -263,20 +383,20 @@ function Home() {
       <div className="relative mt-8">
         {/* Fixed scroll buttons, only show on hover */}
         <button
-          onClick={scrollLeft}
+          onClick={scrollImagesLeft}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
         >
           <FaChevronLeft className="text-2xl" />
         </button>
         <button
-          onClick={scrollRight}
+          onClick={scrollImagesRight}
           className="absolute right-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
         >
           <FaChevronRight className="text-2xl" />
         </button>
 
         {/* Scroll container */}
-        <div ref={scrollRef} className="flex gap-4 overflow-x-hidden my-4">
+        <div ref={imagesScrollRef} className="flex gap-4 overflow-x-hidden my-4">
           {images.map((item, index) => (
             <div
               key={index}
@@ -304,20 +424,20 @@ function Home() {
           </span>
         </h3>
         <button
-          onClick={scrollLeft}
+          onClick={scrollFeaturedLeft}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
         >
           <FaChevronLeft className="text-2xl" />
         </button>
         <button
-          onClick={scrollRight}
+          onClick={scrollFeaturedRight}
           className="absolute right-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
         >
           <FaChevronRight className="text-2xl" />
         </button>
 
         {/* Scroll container */}
-        <div ref={scrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
+        <div ref={featuredScrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
           {featured.map((item, index) => (
             <div
               key={index}
@@ -366,24 +486,23 @@ function Home() {
 
         <div className="  relative  mt-8 cursor-pointer  border border-gray-300 ">
           <button
-            onClick={scrollLeft}
+            onClick={scrollMenLeft}
             className="absolute left-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
           >
             <FaChevronLeft className="text-2xl" />
           </button>
           <button
-            onClick={scrollRight}
+            onClick={scrollMenRight}
             className="absolute right-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
           >
             <FaChevronRight className="text-2xl" />
           </button>
 
-          <div ref={scrollRef} className="overflow-x-hidden m-4">
+          <div ref={menScrollRef} className="overflow-x-hidden m-4">
             <div
               className="
       grid grid-rows-2 grid-flow-col
       gap-4
-      w-max
        auto-cols-[calc(100%/3)] overflow-hidden
     "
             >
@@ -436,19 +555,19 @@ function Home() {
 
         <div className="  relative  mt-8 cursor-pointer  border border-gray-300 ">
           <button
-            onClick={scrollLeft}
+            onClick={scrollFemaleLeft}
             className="absolute left-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
           >
             <FaChevronLeft className="text-2xl" />
           </button>
           <button
-            onClick={scrollRight}
+            onClick={scrollFemaleRight}
             className="absolute right-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
           >
             <FaChevronRight className="text-2xl" />
           </button>
 
-          <div ref={scrollRef} className="overflow-x-hidden m-4">
+          <div ref={femaleScrollRef} className="overflow-x-hidden m-4">
             <div
               className="
       grid grid-rows-2 grid-flow-col
@@ -497,20 +616,20 @@ function Home() {
           </span>
         </h3>
         <button
-          onClick={scrollLeft}
+          onClick={scrollFeatured2Left}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
         >
           <FaChevronLeft className="text-2xl" />
         </button>
         <button
-          onClick={scrollRight}
+          onClick={scrollFeatured2Right}
           className="absolute right-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
         >
           <FaChevronRight className="text-2xl" />
         </button>
 
         {/* Scroll container */}
-        <div ref={scrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
+        <div ref={featured2ScrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
           {featured.map((item, index) => (
             <div
               key={index}
@@ -551,20 +670,20 @@ function Home() {
           </span>
         </h3>
         <button
-          onClick={scrollLeft}
+          onClick={scrollFeatured3Left}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
         >
           <FaChevronLeft className="text-2xl" />
         </button>
         <button
-          onClick={scrollRight}
+          onClick={scrollFeatured3Right}
           className="absolute right-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
         >
           <FaChevronRight className="text-2xl" />
         </button>
 
         {/* Scroll container */}
-        <div ref={scrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
+        <div ref={featured3ScrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
           {featured.map((item, index) => (
             <div
               key={index}
@@ -605,20 +724,20 @@ function Home() {
           </span>
         </h3>
         <button
-          onClick={scrollLeft}
+          onClick={scrollFeatured4Left}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
         >
           <FaChevronLeft className="text-2xl" />
         </button>
         <button
-          onClick={scrollRight}
+          onClick={scrollFeatured4Right}
           className="absolute right-0 top-1/2 transform -translate-y-1/2 z-30 bg-white p-3 rounded-full shadow opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
         >
           <FaChevronRight className="text-2xl" />
         </button>
 
         {/* Scroll container */}
-        <div ref={scrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
+        <div ref={featured4ScrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
           {featured.map((item, index) => (
             <div
               key={index}
