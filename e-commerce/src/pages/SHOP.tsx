@@ -2,26 +2,22 @@ import PriceBadge from "../components/PriceBadge";
 import { FaStar, FaHeart } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa";
 import{FaExchangeAlt, FaSearch} from "react-icons/fa"
-import { useNavigate } from "react-router-dom";
-import type { Product } from "../Model/product";
-
-export const shop: Product []= [
-  { id:1, img: "/1 (25).jpg", tag: "Men's Fashion", title: "Premium Leather Casual Shoes", rate: 4, price: "$99" },
-  { id: 2, img: "/1 (20).jpg", tag: "Female Bags", title: "Designer Handbag Collection", rate: 4, price: "$70" },
-  { id: 3, img: "/1 (19).jpg", tag: "Female pants", title: "Slim Fit Denim Jeans", rate: 4, price: "$13" },
-  { id: 4, img: "/1 (40).jpg", tag: "Trouser", title: "Formal Business Trousers", rate: 4, price: "$100" },
-  { id: 5, img: "/1 (17).jpg", tag: "Party wear", title: "Elegant Evening Dress", rate: 4, price: "$70" },
-  { id: 6, img: "/1 (60).jpg", tag: "Girl's shoes", title: "Kids Comfort Sneakers", rate: 4, price: "$43" },
-  { id: 7, img: "/1 (55).jpg", tag: "Men's complete", title: "Men's Complete Outfit Set", rate: 4, price: "$99" },
-  { id: 8, img: "/1 (31).jpg", tag: "Female shoes", title: "Women's Classic Pumps", rate: 4, price: "$74" },
-  { id: 9, img: "/1 (30).jpg", tag: "High hills", title: "Stiletto High Heels", rate: 4, price: "$30" },
-  { id: 10, img: "/1 (74).jpg", tag: "Tops", title: "Casual Cotton T-Shirt", rate: 4, price: "$55" },
-  { id: 11, img: "/1 (23).jpg", tag: "Female Pant", title: "Wide Leg Palazzo Pants", rate: 4, price: "$55" },
-  { id: 12, img: "/1 (51).jpg", tag: "Men's Fashion", title: "Men Hooded Navy Blue & Grey T-Shirt", rate: 5, price: "$39" },
-];
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useProducts } from "../hooks/useApi";
 
 function SHOP(){
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("search") || "";
+  const { data: products = [], isLoading } = useProducts();
+
+  // Filter products based on search query
+  const filteredProducts = searchQuery 
+    ? products.filter((product: any) => 
+        (product.name || product.title)?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (product.category || product.tag)?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : products;
 
 return (
   <>
@@ -119,7 +115,7 @@ return (
           {/* Top Bar */}
           <div className="flex items-center justify-between border-b pb-4 mb-6">
             <p className="text-gray-600 text-sm">
-              Showing 1–12 Products of 48 Products
+              Showing {filteredProducts.length} Products {searchQuery ? `for "${searchQuery}"` : 'of all Products'}
             </p>
 
             <div className="flex items-center gap-6">
@@ -150,64 +146,76 @@ return (
 
           {/* Products Grid */}
           <div className="grid grid-cols-3 gap-6">
-            {shop.map((item, index) => (
-              <div
-                key={index}
-                className="group bg-white shadow-xl  rounded overflow-hidden"
-              >
-                {/* IMAGE WRAPPER */}
-                <div className="relative overflow-hidden">
-                  {/* Featured badge */}
-                  <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-semibold px-3 py-1 z-10">
-                    FEATURED
-                  </span>
-
-                  {/* Wishlist */}
-                  <FaHeart className="absolute top-2 right-2 text-white z-10 cursor-pointer stroke-black stroke-2" />
-
-                  {/* Image */}
-                  <img
-                    src={item.img}
-                    alt={item.title}
-                    className="w-full h-64 object-cover transition-transform duration-500 group-hover:rotate-2 group-hover:scale-105"
-                  />
-
-                  {/* Hover actions */}
-                  <div className="absolute inset-x-0 bottom-0 bg-blue-600 text-white flex items-center justify-evenly px-4 py-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    <span
-                      className="flex items-center gap-2 text-sm font-semibold cursor-pointer"
-                      onClick={() => navigate(`/product/${item.id}`)}
-                    >
-                      <FaExchangeAlt className="text-lg" />
-                      SELECT OPTIONS
-                    </span>
-
-                    <span
-                      className="flex items-center text-sm cursor-pointer"
-                      onClick={() => navigate(`/product/${item.id}`)}
-                    >
-                      <FaSearch className="text-lg" />
-                    </span>
+            {isLoading ? (
+              [...Array(6)].map((_, index) => (
+                <div key={index} className="bg-white shadow-xl rounded overflow-hidden">
+                  <div className="w-full h-64 bg-gray-200 animate-pulse"></div>
+                  <div className="p-4 space-y-2">
+                    <div className="w-20 h-4 bg-gray-200 animate-pulse rounded"></div>
+                    <div className="w-32 h-4 bg-gray-200 animate-pulse rounded"></div>
                   </div>
                 </div>
+              ))
+            ) : (
+              filteredProducts.map((item: any, index: number) => (
+                <div
+                  key={item.id || item._id || index}
+                  className="group bg-white shadow-xl  rounded overflow-hidden"
+                >
+                  {/* IMAGE WRAPPER */}
+                  <div className="relative overflow-hidden">
+                    {/* Featured badge */}
+                    <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-semibold px-3 py-1 z-10">
+                      FEATURED
+                    </span>
 
-                {/* CONTENT */}
-                <div className="p-4 flex flex-col gap-2">
-                  <p className="text-sm text-gray-500">{item.tag}</p>
-                  <h4 className="font-semibold text-gray-800">{item.title}</h4>
-                  
-                  <div className="flex items-center gap-2">
-                    <span className="bg-blue-500 text-white px-2 rounded text-sm">
-                      {item.rate}
-                      <FaStar className="inline ml-1 mb-0.5" />
-                    </span>
-                    <span className="text-lg font-semibold text-gray-800">
-                      {item.price}
-                    </span>
+                    {/* Wishlist */}
+                    <FaHeart className="absolute top-2 right-2 text-white z-10 cursor-pointer stroke-black stroke-2" />
+
+                    {/* Image */}
+                    <img
+                      src={item.image || item.img}
+                      alt={item.name || item.title}
+                      className="w-full h-64 object-cover transition-transform duration-500 group-hover:rotate-2 group-hover:scale-105"
+                    />
+
+                    {/* Hover actions */}
+                    <div className="absolute inset-x-0 bottom-0 bg-blue-600 text-white flex items-center justify-evenly px-4 py-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                      <span
+                        className="flex items-center gap-2 text-sm font-semibold cursor-pointer"
+                        onClick={() => navigate(`/product/${item.id || item._id}`)}
+                      >
+                        <FaExchangeAlt className="text-lg" />
+                        SELECT OPTIONS
+                      </span>
+
+                      <span
+                        className="flex items-center text-sm cursor-pointer"
+                        onClick={() => navigate(`/product/${item.id || item._id}`)}
+                      >
+                        <FaSearch className="text-lg" />
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* CONTENT */}
+                  <div className="p-4 flex flex-col gap-2">
+                    <p className="text-sm text-gray-500">{item.category || item.tag}</p>
+                    <h4 className="font-semibold text-gray-800">{item.name || item.title}</h4>
+                    
+                    <div className="flex items-center gap-2">
+                      <span className="bg-blue-500 text-white px-2 rounded text-sm">
+                        {item.rating || item.rate || 4}
+                        <FaStar className="inline ml-1 mb-0.5" />
+                      </span>
+                      <span className="text-lg font-semibold text-gray-800">
+                        ${item.price}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

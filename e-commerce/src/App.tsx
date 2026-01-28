@@ -3,6 +3,7 @@ import Blogs from "./pages/BLOGS";
 import Home from "./pages/HOME";
 import CONTACT from "./pages/CONTACT";
 import SHOP from "./pages/SHOP";
+import Categories from "./pages/Categories";
 import { Routes, Route } from "react-router-dom";
 import ProductDetails from "./components/ProductDetails";
 
@@ -14,6 +15,7 @@ function App() {
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/contact" element={<CONTACT />} />
         <Route path="/shop" element={<SHOP />} />
+        <Route path="/categories" element={<Categories />} />
         <Route path="/product/:id" element={<ProductDetails />} />
       </Route>
     </Routes>

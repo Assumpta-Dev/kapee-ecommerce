@@ -1,8 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { FaChevronLeft, FaChevronRight, FaHeart, FaStar } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import "../App.css";
 import PriceBadge from "../components/PriceBadge";
+import { useCategories, useProducts } from "../hooks/useApi";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "../api/apiClient";
 
 const slides = [
   {
@@ -25,7 +29,7 @@ const slides = [
   },
 ];
 
-const images = [
+const staticCategories = [
   { img: "./1 (8).jpg", tag: "Men" },
   { img: "./1 (1).jpg", tag: "Bags" },
   { img: "./1 (2).jpg", tag: "pants" },
@@ -39,154 +43,51 @@ const images = [
   { img: "./1 (14).jpg", tag: "Female Pants" },
   { img: "./1 (10).jpg", tag: "Men's Fashion" },
 ];
-const featured = [
-  { img: "./1 (25).jpg", tag: "Men's Fashion", title: "Female shoes", rate: 4, price: "$99" },
-  { img: "./1 (20).jpg", tag: "Female Bags", title: "Female shoes", rate: 4, price: "$70" },
-  { img: "./1 (19).jpg", tag: "Female pants", title: "Female pants", rate: 4, price: "$13" },
-  { img: "./1 (40).jpg", tag: "Trouser", title: "Trouser", rate: 4, price: "$100" },
-  { img: "./1 (17).jpg", tag: "Party wear", title: "Party wear", rate: 4, price: "$70" },
-  { img: "./1 (60).jpg", tag: "Girl's shoes", title: "Girl's shoes", rate: 4, price: "$43" },
-  { img: "./1 (55).jpg", tag: "Men's complete", title: "Men's complete", rate: 4, price: "$99" },
-  { img: "./1 (31).jpg", tag: "Female shoes", title: "Female shoes", rate: 4, price: "$74" },
-  { img: "./1 (30).jpg", tag: "High hills", title: "High hills", rate: 4, price: "$30" },
-  { img: "./1 (74).jpg", tag: "Tops", title: "Tops", rate: 4, price: "$55" },
-  { img: "./1 (23).jpg", tag: "Female Pant", title: "Female Pant", rate: 4, price: "$55" },
-  { img: "./1 (51).jpg", tag: "Men's Fashion", title: "Men's Fashion", rate: 4, price: "$39" },
-];
-const men = [
-  {
-    img: "./1 (3).jpg",
-    tag: "Men's Fashion",
-    title: "Trouser",
-    rate: 4,
-    price: "$99",
-  },
-  {
-    img: "./1 (4).jpg",
-    tag: "Men's Fashion",
-    title: "Complete for men",
-    rate: 4,
-    price: "$70",
-  },
-  {
-    img: "./1 (6).jpg",
-    tag: "Men Pants",
-    title: "Good every season",
-    rate: 4,
-    price: "$13",
-  },
-  {
-    img: "./1 (12).jpg",
-    tag: "Trouser",
-    title: "Trouser",
-    rate: 4,
-    price: "$100",
-  },
-  {
-    img: "./1 (9).jpg",
-    tag: "Party wear",
-    title: "Party wear",
-    rate: 4,
-    price: "$70",
-  },
-  {
-    img: "./1 (13).jpg",
-    tag: "Girl's shoes",
-    title: "Girl's shoes",
-    rate: 4,
-    price: "$43",
-  },
-  {
-    img: "./1 (14).jpg",
-    tag: "Men's complete",
-    title: "Men's complete",
-    rate: 4,
-    price: "$99",
-  },
-  {
-    img: "./1 (10).jpg",
-    tag: "Men's Fashion",
-    title: "Get it now",
-    rate: 4,
-    price: "$74",
-  },
-  {
-    img: "./1 (11).jpg",
-    tag: "Men's Fashion",
-    title: "Boss man",
-    rate: 4,
-    price: "$30",
-  },
-  
-];
-const female = [
-  {
-    img: "./1 (2).jpg",
-    tag: "Men's Fashion",
-    title: "Trouser",
-    rate: 4,
-    price: "$99",
-  },
-  {
-    img: "./1 (7).jpg",
-    tag: "Men's Fashion",
-    title: "Complete for men",
-    rate: 4,
-    price: "$70",
-  },
-  {
-    img: "./1 (14).jpg",
-    tag: "Men Pants",
-    title: "Good every season",
-    rate: 4,
-    price: "$13",
-  },
-  {
-    img: "./1 (15).jpg",
-    tag: "Trouser",
-    title: "Trouser",
-    rate: 4,
-    price: "$100",
-  },
-  {
-    img: "./1 (16).jpg",
-    tag: "Party wear",
-    title: "Party wear",
-    rate: 4,
-    price: "$70",
-  },
-  {
-    img: "./1 (17).jpg",
-    tag: "Girl's shoes",
-    title: "Girl's shoes",
-    rate: 4,
-    price: "$43",
-  },
-  {
-    img: "./1 (54).jpg",
-    tag: "Men's complete",
-    title: "Men's complete",
-    rate: 4,
-    price: "$99",
-  },
-  {
-    img: "./1 (66).jpg",
-    tag: "Men's Fashion",
-    title: "Get it now",
-    rate: 4,
-    price: "$74",
-  },
-  {
-    img: "./1 (68).jpg",
-    tag: "Men's Fashion",
-    title: "Boss man",
-    rate: 4,
-    price: "$30",
-  },
-];
 
 function Home() {
   const [current, setCurrent] = useState(0);
+  const navigate = useNavigate();
+
+  async function getCategories() {
+    const response = await apiClient.get("category");
+    return response.data;
+  }
+
+  async function getProducts() {
+    const response = await apiClient.get("product");
+    return response.data;
+  }
+
+  const {
+    data: categoriesData,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+  } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
+
+  const {
+    data: productsData,
+    isLoading: productsLoading,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+  });
+
+
+  console.log(categoriesData);
+
+
+
+  
+
+  const { data: categories = [], isLoading: categoriesLoading } =
+    useCategories();
+  const { data: products = [] } = useProducts();
+
   const imagesScrollRef = useRef<HTMLDivElement>(null);
   const featuredScrollRef = useRef<HTMLDivElement>(null);
   const menScrollRef = useRef<HTMLDivElement>(null);
@@ -194,6 +95,223 @@ function Home() {
   const featured2ScrollRef = useRef<HTMLDivElement>(null);
   const featured3ScrollRef = useRef<HTMLDivElement>(null);
   const featured4ScrollRef = useRef<HTMLDivElement>(null);
+
+  const handleCategoryClick = (category: any) => {
+    const categoryName = category.name || category.tag;
+    navigate(`/categories?category=${encodeURIComponent(categoryName)}`);
+  };
+
+  // Filter products for different sections
+  const featured = [
+    {
+      img: "./1 (25).jpg",
+      tag: "Men's Fashion",
+      title: "Female shoes",
+      rate: 4,
+      price: "$99",
+    },
+    {
+      img: "./1 (20).jpg",
+      tag: "Female Bags",
+      title: "Female shoes",
+      rate: 4,
+      price: "$70",
+    },
+    {
+      img: "./1 (19).jpg",
+      tag: "Female pants",
+      title: "Female pants",
+      rate: 4,
+      price: "$13",
+    },
+    {
+      img: "./1 (40).jpg",
+      tag: "Trouser",
+      title: "Trouser",
+      rate: 4,
+      price: "$100",
+    },
+    {
+      img: "./1 (17).jpg",
+      tag: "Party wear",
+      title: "Party wear",
+      rate: 4,
+      price: "$70",
+    },
+    {
+      img: "./1 (60).jpg",
+      tag: "Girl's shoes",
+      title: "Girl's shoes",
+      rate: 4,
+      price: "$43",
+    },
+    {
+      img: "./1 (55).jpg",
+      tag: "Men's complete",
+      title: "Men's complete",
+      rate: 4,
+      price: "$99",
+    },
+    {
+      img: "./1 (31).jpg",
+      tag: "Female shoes",
+      title: "Female shoes",
+      rate: 4,
+      price: "$74",
+    },
+    {
+      img: "./1 (30).jpg",
+      tag: "High hills",
+      title: "High hills",
+      rate: 4,
+      price: "$30",
+    },
+    { img: "./1 (74).jpg", tag: "Tops", title: "Tops", rate: 4, price: "$55" },
+    {
+      img: "./1 (23).jpg",
+      tag: "Female Pant",
+      title: "Female Pant",
+      rate: 4,
+      price: "$55",
+    },
+    {
+      img: "./1 (51).jpg",
+      tag: "Men's Fashion",
+      title: "Men's Fashion",
+      rate: 4,
+      price: "$39",
+    },
+  ];
+  const men = [
+    {
+      img: "./1 (3).jpg",
+      tag: "Men's Fashion",
+      title: "Trouser",
+      rate: 4,
+      price: "$99",
+    },
+    {
+      img: "./1 (4).jpg",
+      tag: "Men's Fashion",
+      title: "Complete for men",
+      rate: 4,
+      price: "$70",
+    },
+    {
+      img: "./1 (6).jpg",
+      tag: "Men Pants",
+      title: "Good every season",
+      rate: 4,
+      price: "$13",
+    },
+    {
+      img: "./1 (12).jpg",
+      tag: "Trouser",
+      title: "Trouser",
+      rate: 4,
+      price: "$100",
+    },
+    {
+      img: "./1 (9).jpg",
+      tag: "Party wear",
+      title: "Party wear",
+      rate: 4,
+      price: "$70",
+    },
+    {
+      img: "./1 (13).jpg",
+      tag: "Girl's shoes",
+      title: "Girl's shoes",
+      rate: 4,
+      price: "$43",
+    },
+    {
+      img: "./1 (14).jpg",
+      tag: "Men's complete",
+      title: "Men's complete",
+      rate: 4,
+      price: "$99",
+    },
+    {
+      img: "./1 (10).jpg",
+      tag: "Men's Fashion",
+      title: "Get it now",
+      rate: 4,
+      price: "$74",
+    },
+    {
+      img: "./1 (11).jpg",
+      tag: "Men's Fashion",
+      title: "Boss man",
+      rate: 4,
+      price: "$30",
+    },
+  ];
+  const female = [
+    {
+      img: "./1 (2).jpg",
+      tag: "Men's Fashion",
+      title: "Trouser",
+      rate: 4,
+      price: "$99",
+    },
+    {
+      img: "./1 (7).jpg",
+      tag: "Men's Fashion",
+      title: "Complete for men",
+      rate: 4,
+      price: "$70",
+    },
+    {
+      img: "./1 (14).jpg",
+      tag: "Men Pants",
+      title: "Good every season",
+      rate: 4,
+      price: "$13",
+    },
+    {
+      img: "./1 (15).jpg",
+      tag: "Trouser",
+      title: "Trouser",
+      rate: 4,
+      price: "$100",
+    },
+    {
+      img: "./1 (16).jpg",
+      tag: "Party wear",
+      title: "Party wear",
+      rate: 4,
+      price: "$70",
+    },
+    {
+      img: "./1 (17).jpg",
+      tag: "Girl's shoes",
+      title: "Girl's shoes",
+      rate: 4,
+      price: "$43",
+    },
+    {
+      img: "./1 (54).jpg",
+      tag: "Men's complete",
+      title: "Men's complete",
+      rate: 4,
+      price: "$99",
+    },
+    {
+      img: "./1 (66).jpg",
+      tag: "Men's Fashion",
+      title: "Get it now",
+      rate: 4,
+      price: "$74",
+    },
+    {
+      img: "./1 (68).jpg",
+      tag: "Men's Fashion",
+      title: "Boss man",
+      rate: 4,
+      price: "$30",
+    },
+  ];
 
   // Main slider auto
   useEffect(() => {
@@ -343,11 +461,14 @@ function Home() {
   return (
     <>
       {/* Main Slider */}
-      <div className="w-full h-screen relative overflow-hidden">
+      <div className="w-full h-screen relative overflow-hidden bg-gray-100">
         <img
           src={slides[current].img}
-          alt=""
-          className="w-full h-auto object-cover"
+          alt={slides[current].title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
         />
 
         <div
@@ -396,23 +517,33 @@ function Home() {
         </button>
 
         {/* Scroll container */}
-        <div ref={imagesScrollRef} className="flex gap-4 overflow-x-hidden my-4">
-          {images.map((item, index) => (
-            <div
-              key={index}
-              className="flex-shrink-0 flex flex-col items-center"
-              style={{ width: `calc(100% / 8)` }} // ensures 8 columns visible
-            >
-              <img
-                src={item.img}
-                alt={`Image ${index + 1}`}
-                className="w-full h-32 object-cover rounded-full"
-              />
-              <p className="mt-2 text-center text-sm font-medium text-gray-800">
-                {item.tag}
-              </p>
-            </div>
-          ))}
+        {/* Scroll container */}
+        <div
+          ref={imagesScrollRef}
+          className="flex gap-4 overflow-x-hidden my-4"
+        >
+          {(categoriesData?.length > 0 ? categoriesData : staticCategories).map(
+            (item: any, index: number) => (
+              <div
+                key={item.id || item._id || index}
+                className="flex-shrink-0 flex flex-col items-center cursor-pointer"
+                style={{ width: `calc(100% / 8)` }}
+                onClick={() => handleCategoryClick(item)}
+              >
+                <img
+                  src={item.image || item.img}
+                  alt={`Image ${index + 1}`}
+                  className="w-full h-32 object-cover rounded-full hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://via.placeholder.com/150x150/3B82F6/FFFFFF?text=${encodeURIComponent(item.name || item.tag)}`;
+                  }}
+                />
+                <p className="mt-2 text-center text-sm font-medium text-gray-800 hover:text-blue-600 transition-colors">
+                  {item.name || item.tag}
+                </p>
+              </div>
+            ),
+          )}
         </div>
       </div>
       {/*featured products section*/}
@@ -437,34 +568,40 @@ function Home() {
         </button>
 
         {/* Scroll container */}
-        <div ref={featuredScrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
-          {featured.map((item, index) => (
+        <div
+          ref={featuredScrollRef}
+          className="flex gap-2 overflow-x-hidden m-4 "
+        >
+          {(productsData?.length > 0 ? productsData : featured).map((item, index) => (
             <div
-              key={index}
+              key={item.id || item._id || index}
               className="flex-shrink-0 flex flex-col items-center"
-              style={{ width: `calc(100% / 4)` }} // ensures 4 columns visible
+              style={{ width: `calc(100% / 4)` }}
             >
               <div className="w-full flex flex-col justify-center items-start shadow-lg h-full border border-gray-200 p-2 ">
                 <div className="relative w-full h-48">
                   <img
-                    src={item.img}
+                    src={item.image || item.img}
                     alt={`Image ${index + 1}`}
                     className="w-full h-full object-cover rounded"
+                    onError={(e) => {
+                      e.currentTarget.src = `https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Product`;
+                    }}
                   />
                   <FaHeart className="absolute top-2 right-8 text-white stroke-gray-400 stroke-[30]" />
                 </div>
                 <p className="mt-2 text-sm font-medium text-gray-800 ">
-                  {item.tag}
+                  {item.category || item.tag}
                 </p>
                 <p className="mt-2 text-sm font-medium text-gray-800 ">
-                  {item.title}
+                  {item.name || item.title}
                 </p>
                 <p className="mt-2 text-sm font-medium text-gray-800 text-white bg-blue-500 px-2 rounded">
-                  {item.rate}{" "}
+                  {item.rating || item.rate}{" "}
                   <FaStar className="inline-block text-white mb-1" />
                 </p>
                 <p className="mt-2 text-lg font-medium text-gray-800">
-                  {item.price} <span className="text-green-500">50 % off</span>
+                  ${item.price} <span className="text-green-500">50 % off</span>
                 </p>
               </div>
             </div>
@@ -515,6 +652,9 @@ function Home() {
                         src={item.img}
                         alt={item.title}
                         className="w-full h-full object-cover rounded"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Men`;
+                        }}
                       />
                       <FaHeart className="absolute top-2 right-2 text-white" />
                     </div>
@@ -585,6 +725,9 @@ function Home() {
                         src={item.img}
                         alt={item.title}
                         className="w-full h-full object-cover rounded"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://via.placeholder.com/300x200/EC4899/FFFFFF?text=Women`;
+                        }}
                       />
                       <FaHeart className="absolute top-2 right-2 text-white" />
                     </div>
@@ -629,7 +772,10 @@ function Home() {
         </button>
 
         {/* Scroll container */}
-        <div ref={featured2ScrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
+        <div
+          ref={featured2ScrollRef}
+          className="flex gap-2 overflow-x-hidden m-4 "
+        >
           {featured.map((item, index) => (
             <div
               key={index}
@@ -683,7 +829,10 @@ function Home() {
         </button>
 
         {/* Scroll container */}
-        <div ref={featured3ScrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
+        <div
+          ref={featured3ScrollRef}
+          className="flex gap-2 overflow-x-hidden m-4 "
+        >
           {featured.map((item, index) => (
             <div
               key={index}
@@ -737,7 +886,10 @@ function Home() {
         </button>
 
         {/* Scroll container */}
-        <div ref={featured4ScrollRef} className="flex gap-2 overflow-x-hidden m-4 ">
+        <div
+          ref={featured4ScrollRef}
+          className="flex gap-2 overflow-x-hidden m-4 "
+        >
           {featured.map((item, index) => (
             <div
               key={index}
@@ -752,7 +904,6 @@ function Home() {
                     className="w-full h-full object-cover rounded"
                   />
                   <FaHeart className="absolute top-2 right-8 text-white stroke-gray-400 stroke-[30]" />
-                  <PriceBadge price={39} />
                 </div>
                 <p className="mt-2 text-sm font-medium text-gray-800 ">
                   {item.tag}

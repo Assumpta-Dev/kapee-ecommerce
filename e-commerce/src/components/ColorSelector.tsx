@@ -17,7 +17,6 @@ const ColorSelector = ({ colors, onColorSelect }: ColorSelectorProps) => {
     setSelectedColor(color);
     onColorSelect?.(color);
   };
-
   return (
     <div className="flex flex-col gap-3">
       <h3 className="font-semibold text-gray-900">Color</h3>

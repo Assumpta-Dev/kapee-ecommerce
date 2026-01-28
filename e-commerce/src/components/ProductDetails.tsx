@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { shop } from "../pages/SHOP";
+import { useProducts } from "../hooks/useApi";
 import { useCart } from "../context/Cart";
 import { 
   FaStar, 
@@ -29,7 +29,8 @@ import PriceBadge from "./PriceBadge";
 export default function ProductPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const product = shop.find((p) => p.id === Number(id));
+  const { data: products = [] } = useProducts();
+  const product = products.find((p: any) => (p.id || p._id).toString() === id);
   const { addToCart, openCart } = useCart();
 
   const [selectedImage, setSelectedImage] = useState(0);
@@ -39,10 +40,15 @@ export default function ProductPage() {
   if (!product) return <p className="p-10 text-center">Product not found</p>;
 
   // Use actual product data
-  const productImages = [product.img, product.img, product.img, product.img];
+  const productImages = [
+    product.image || product.img, 
+    product.image || product.img, 
+    product.image || product.img, 
+    product.image || product.img
+  ];
   
   // Dynamic breadcrumb using product's tag
-  const breadcrumbItems = ["Home", "Shop", product.tag, product.title];
+  const breadcrumbItems = ["Home", "Shop", product.category || product.tag, product.name || product.title];
   
   const colors = [
     { name: "Blue", value: "#3B82F6" },
@@ -67,10 +73,10 @@ export default function ProductPage() {
   ];
 
   // Get related products excluding current one
-  const relatedProducts = shop.filter(p => p.id !== product.id).slice(0, 3);
+  const relatedProducts = products.filter((p: any) => (p.id || p._id) !== (product.id || product._id)).slice(0, 3);
   
-  // Parse price (remove $ sign) for calculations
-  const numericPrice = parseFloat(product.price.replace('$', ''));
+  // Parse price for calculations
+  const numericPrice = typeof product.price === 'string' ? parseFloat(product.price.replace('$', '')) : product.price;
   const discountedPrice = (numericPrice * 0.81).toFixed(2); // 19% off
   const priceRange = {
     min: parseFloat(discountedPrice),
@@ -171,13 +177,13 @@ export default function ProductPage() {
 
             {/* Product Title */}
             <h1 className="text-3xl font-bold text-gray-900">
-              {product.title}
+              {product.name || product.title}
             </h1>
 
             {/* Rating */}
             <div className="flex items-center gap-2">
               <span className="bg-green-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1 font-semibold">
-                {product.rate} <FaStar className="text-white text-xs" />
+                {product.rating || product.rate || 4} <FaStar className="text-white text-xs" />
               </span>
             </div>
 
@@ -187,7 +193,7 @@ export default function ProductPage() {
             {/* Price */}
             <div className="flex items-center gap-3">
               <span className="text-4xl font-bold text-gray-900">
-                ${priceRange.min.toFixed(2)}–${product.price}
+                ${priceRange.min.toFixed(2)}–${numericPrice}
               </span>
               <span className="bg-green-100 text-green-700 px-3 py-1 rounded text-sm font-semibold">
                 19% Off
@@ -245,8 +251,8 @@ export default function ProductPage() {
             <div className="bg-gray-900 text-white px-6 py-4 rounded-lg flex items-center gap-3 w-fit">
               <span className="text-4xl font-bold">K</span>
               <div>
-                <p className="font-bold text-lg">{product.tag}</p>
-                <p className="text-xs text-gray-400">{product.title}</p>
+                <p className="font-bold text-lg">{product.category || product.tag}</p>
+                <p className="text-xs text-gray-400">{product.name || product.title}</p>
               </div>
             </div>
 
@@ -288,7 +294,7 @@ export default function ProductPage() {
             {/* Current Price */}
             <div className="flex items-center gap-3">
               <span className="text-3xl font-bold text-gray-900">${discountedPrice}</span>
-              <span className="text-xl text-gray-400 line-through">{product.price}</span>
+              <span className="text-xl text-gray-400 line-through">${numericPrice}</span>
             </div>
 
             {/* Quantity Selector */}
@@ -364,15 +370,15 @@ export default function ProductPage() {
             <div className="space-y-2 text-sm border-t pt-4">
               <div className="flex gap-2">
                 <span className="font-semibold text-gray-900">SKU:</span>
-                <span className="text-gray-700">SKU-{product.id}</span>
+                <span className="text-gray-700">SKU-{product.id || product._id}</span>
               </div>
               <div className="flex gap-2">
                 <span className="font-semibold text-gray-900">Category:</span>
-                <span className="text-gray-700">{product.tag}</span>
+                <span className="text-gray-700">{product.category || product.tag}</span>
               </div>
               <div className="flex gap-2">
                 <span className="font-semibold text-gray-900">Tags:</span>
-                <span className="text-gray-700">{product.tag}, {product.title}</span>
+                <span className="text-gray-700">{product.category || product.tag}, {product.name || product.title}</span>
               </div>
               <div className="flex gap-2">
                 <span className="font-semibold text-gray-900">Brand:</span>
@@ -391,18 +397,18 @@ export default function ProductPage() {
           <div className="flex flex-wrap items-end gap-6">
             {/* Product Cards */}
             <div className="flex gap-4">
-              {relatedProducts.map((item) => (
-                <div key={item.id} className="relative">
+              {relatedProducts.map((item: any) => (
+                <div key={item.id || item._id} className="relative">
                   <input
                     type="checkbox"
-                    checked={selectedProducts.includes(item.id)}
-                    onChange={() => toggleProductSelection(item.id)}
+                    checked={selectedProducts.includes(item.id || item._id)}
+                    onChange={() => toggleProductSelection(item.id || item._id)}
                     className="absolute top-2 right-2 w-5 h-5 accent-blue-600 z-10 cursor-pointer"
                   />
                   <div className="w-48 border-2 border-gray-200 rounded-lg overflow-hidden">
                     <img
-                      src={item.img}
-                      alt={item.title}
+                      src={item.image || item.img}
+                      alt={item.name || item.title}
                       className="w-full h-48 object-cover"
                     />
                   </div>

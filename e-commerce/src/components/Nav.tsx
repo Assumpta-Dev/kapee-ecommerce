@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import LoginModal from "./LoginModal";
-import { FaUser, FaHeart, FaShoppingBag, FaEnvelope, FaQuestionCircle, FaChevronDown, FaBlog, FaBars, FaSearch } from "react-icons/fa"; 
+import SearchBar from "./SearchBar";
+import { FaUser, FaHeart, FaShoppingBag, FaEnvelope, FaQuestionCircle, FaChevronDown, FaBlog, FaBars } from "react-icons/fa"; 
 import { useCart } from "../context/Cart";
 
 
@@ -54,17 +55,7 @@ function Navbar() {
       </div>
       <div className="flex md:flex-row items-center justify-between w-full m-2 space-x-10 text-white p-4">
         <h3 className=" font-bold font-size-lg px-4 text-4xl">Kapee.</h3>
-        <div className="flex  w-lg p-2 rounded-4xl bg-white shadow-xl justify-between text-gray-500 text-sm cursor-pointer">
-          <div className="w-full flex flex-4 items-center gap-2 cursor-pointer">
-            Search for products, categories, brands....{" "}
-            <p className=" flex flex-2 items-center justify-between px-4 border-l border-r border-gray-300 min-h-[30px]">
-              All Categories <FaChevronDown></FaChevronDown>{" "}
-            </p>
-            <span className="flex p-2">
-              <FaSearch className="w-4 h-4 text-blue-500"></FaSearch>
-            </span>
-          </div>
-        </div>
+        <SearchBar />
         {/* USER ICON */}
 
         <button
