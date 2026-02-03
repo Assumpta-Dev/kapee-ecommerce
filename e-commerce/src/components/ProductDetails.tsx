@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useProducts } from "../hooks/useApi";
+import { productAPI } from "../api/apiProductNew";
 import { useCart } from "../context/Cart";
 import { 
   FaStar, 
@@ -29,26 +29,58 @@ import PriceBadge from "./PriceBadge";
 export default function ProductPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data: products = [] } = useProducts();
-  const product = products.find((p: any) => (p.id || p._id).toString() === id);
+  const [product, setProduct] = useState<any>(null);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { addToCart, openCart } = useCart();
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedProducts, setSelectedProducts] = useState<number[]>([1, 2]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [productRes, productsRes] = await Promise.all([
+          productAPI.getById(id!),
+          productAPI.getAll()
+        ]);
+        setProduct(productRes.data);
+        setProducts(productsRes.data || []);
+      } catch (error) {
+        console.error('Failed to fetch product:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (id) {
+      fetchData();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
   if (!product) return <p className="p-10 text-center">Product not found</p>;
 
-  // Use actual product data
-  const productImages = [
-    product.image || product.img, 
-    product.image || product.img, 
-    product.image || product.img, 
-    product.image || product.img
-  ];
+  // Use actual product data - fix image paths
+  const productImages = product.images && product.images.length > 0 
+    ? product.images.map((img: string) => `http://localhost:7000${img}`)
+    : [
+        'https://via.placeholder.com/600x600/3B82F6/FFFFFF?text=Product',
+        'https://via.placeholder.com/600x600/3B82F6/FFFFFF?text=Product',
+        'https://via.placeholder.com/600x600/3B82F6/FFFFFF?text=Product',
+        'https://via.placeholder.com/600x600/3B82F6/FFFFFF?text=Product'
+      ];
   
-  // Dynamic breadcrumb using product's tag
-  const breadcrumbItems = ["Home", "Shop", product.category || product.tag, product.name || product.title];
+  // Dynamic breadcrumb using product's category
+  const breadcrumbItems = ["Home", "Shop", product.categoryId?.name || "Category", product.name];
   
   const colors = [
     { name: "Blue", value: "#3B82F6" },
@@ -73,7 +105,7 @@ export default function ProductPage() {
   ];
 
   // Get related products excluding current one
-  const relatedProducts = products.filter((p: any) => (p.id || p._id) !== (product.id || product._id)).slice(0, 3);
+  const relatedProducts = products.filter((p: any) => p._id !== product._id).slice(0, 3);
   
   // Parse price for calculations
   const numericPrice = typeof product.price === 'string' ? parseFloat(product.price.replace('$', '')) : product.price;
@@ -83,14 +115,22 @@ export default function ProductPage() {
     max: numericPrice
   };
 
-  const handleAddToCart = () => {
-    addToCart(product);
-    openCart();
+  const handleAddToCart = async () => {
+    try {
+      await addToCart(product._id, quantity);
+      openCart();
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    }
   };
 
-  const handleBuyNow = () => {
-    addToCart(product);
-    navigate("/checkout");
+  const handleBuyNow = async () => {
+    try {
+      await addToCart(product._id, quantity);
+      navigate("/checkout");
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    }
   };
 
   const toggleProductSelection = (productId: number) => {
@@ -127,6 +167,9 @@ export default function ProductPage() {
                     src={img}
                     alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/80x80/3B82F6/FFFFFF?text=Product';
+                    }}
                   />
                 </div>
               ))}
@@ -140,8 +183,11 @@ export default function ProductPage() {
 
               <img
                 src={productImages[selectedImage]}
-                alt={product.title}
+                alt={product.name || product.title}
                 className="w-full h-[600px] object-cover rounded-lg"
+                onError={(e) => {
+                  e.currentTarget.src = 'https://via.placeholder.com/600x600/3B82F6/FFFFFF?text=Product';
+                }}
               />
 
               <button
@@ -177,13 +223,13 @@ export default function ProductPage() {
 
             {/* Product Title */}
             <h1 className="text-3xl font-bold text-gray-900">
-              {product.name || product.title}
+              {product.name}
             </h1>
 
             {/* Rating */}
             <div className="flex items-center gap-2">
               <span className="bg-green-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1 font-semibold">
-                {product.rating || product.rate || 4} <FaStar className="text-white text-xs" />
+                4.5 <FaStar className="text-white text-xs" />
               </span>
             </div>
 
@@ -407,9 +453,12 @@ export default function ProductPage() {
                   />
                   <div className="w-48 border-2 border-gray-200 rounded-lg overflow-hidden">
                     <img
-                      src={item.image || item.img}
+                      src={item.images && item.images.length > 0 ? `http://localhost:7000${item.images[0]}` : 'https://via.placeholder.com/200x200/3B82F6/FFFFFF?text=Product'}
                       alt={item.name || item.title}
                       className="w-full h-48 object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://via.placeholder.com/200x200/3B82F6/FFFFFF?text=Product';
+                      }}
                     />
                   </div>
                 </div>

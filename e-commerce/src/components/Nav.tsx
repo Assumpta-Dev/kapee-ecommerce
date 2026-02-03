@@ -2,14 +2,21 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import LoginModal from "./LoginModal";
 import SearchBar from "./SearchBar";
-import { FaUser, FaHeart, FaShoppingBag, FaEnvelope, FaQuestionCircle, FaChevronDown, FaBlog, FaBars } from "react-icons/fa"; 
+import { FaUser, FaHeart, FaShoppingBag, FaEnvelope, FaQuestionCircle, FaChevronDown, FaBlog, FaBars, FaSignOutAlt } from "react-icons/fa"; 
 import { useCart } from "../context/Cart";
-
-
+import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
-   const { totalQty, totalPrice, openCart } = useCart();
+  const { totalQty, totalPrice, openCart } = useCart();
   const [openLogin, setOpenLogin] = useState(false);
+  const { user, logout } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    setShowUserMenu(false);
+  };
+
   return (
     <nav className="navbar w-full  flex flex-wrap bg-blue-500 shadow-lg">
       <div className="top-nav w-full flex justify-between text-white pt-4 pr-4 pl-4 border-b border-white pb-1">
@@ -58,45 +65,93 @@ function Navbar() {
         <SearchBar />
         {/* USER ICON */}
 
-        <button
-          onClick={() => setOpenLogin(true)}
-          className="text-white flex items-center gap-1 cursor-pointer"
-        >
-          <FaUser className="w-6 h-6" />
-        </button>
+        {user ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="text-white flex items-center gap-2 cursor-pointer"
+            >
+              <FaUser className="w-6 h-6" />
+              <span className="text-sm">{user.firstName}</span>
+              <FaChevronDown className="w-3 h-3" />
+            </button>
+            
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                <div className="px-4 py-2 text-sm text-gray-700 border-b">
+                  {user.firstName} {user.lastName}
+                  <div className="text-xs text-gray-500 capitalize">{user.role}</div>
+                </div>
+                {user.role === 'vendor' && (
+                  <Link
+                    to="/admin"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Vendor Dashboard
+                  </Link>
+                )}
+                {user.role === 'admin' && (
+                  <Link
+                    to="/admin"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <FaSignOutAlt className="inline mr-2" />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={() => setOpenLogin(true)}
+            className="text-white flex items-center gap-1 cursor-pointer"
+          >
+            <FaUser className="w-6 h-6" />
+          </button>
+        )}
 
         {/* LOGIN MODAL */}
         {openLogin && <LoginModal onClose={() => setOpenLogin(false)} />}
         <div className="">
-          <Link to="/cart" className="relative text-white flex items-center">
+          <Link to="/wishlist" className="relative text-white flex items-center">
             <FaHeart className="w-6 h-6" />
 
-            {/* Cart count badge */}
+            {/* Wishlist count badge */}
             <span className="absolute -top-2 -right-2 w-4 h-4 bg-blue-600 text-white text-xs font-semibold rounded-full shadow-lg flex items-center justify-center">
               0
             </span>
           </Link>
         </div>
         <div className="">
-          <button
-            onClick={openCart}
-            className="text-white flex items-center gap-3 cursor-pointer"
-          >
-            <div className="relative">
-              <FaShoppingBag className="w-6 h-6" />
+          <Link to="/cart">
+            <button
+              className="text-white flex items-center gap-3 cursor-pointer"
+            >
+              <div className="relative">
+                <FaShoppingBag className="w-6 h-6" />
 
-              {totalQty > 0 && (
-                <span className="absolute -top-2 -right-2 w-4 h-4 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center">
-                  {totalQty}
-                </span>
-              )}
-            </div>
+                {totalQty > 0 && (
+                  <span className="absolute -top-2 -right-2 w-4 h-4 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center">
+                    {totalQty}
+                  </span>
+                )}
+              </div>
 
-            <div className="flex flex-col leading-tight">
-              <p className="text-sm">Cart</p>
-              <p className="font-bold text-lg">${totalPrice.toFixed(2)}</p>
-            </div>
-          </button>
+              <div className="flex flex-col leading-tight">
+                <p className="text-sm">Cart</p>
+                <p className="font-bold text-lg">${totalPrice.toFixed(2)}</p>
+              </div>
+            </button>
+          </Link>
         </div>
       </div>
 

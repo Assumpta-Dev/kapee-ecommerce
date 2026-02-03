@@ -3,19 +3,50 @@ import { FaStar, FaHeart } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa";
 import{FaExchangeAlt, FaSearch} from "react-icons/fa"
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useProducts } from "../hooks/useApi";
+import { useState, useEffect } from "react";
+import { productAPI } from "../api/apiProductNew";
+import { categoryAPI } from "../api/apiCategoryNew";
+import { useCart } from "../context/Cart";
+
 
 function SHOP(){
   const navigate = useNavigate();
+  const { addToCart, openCart } = useCart();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
-  const { data: products = [], isLoading } = useProducts();
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [productsRes, categoriesRes] = await Promise.all([
+        productAPI.getAll(),
+        categoryAPI.getAll()
+      ]);
+      
+      setProducts(productsRes.data || []);
+      setCategories(categoriesRes.data || []);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddToCart = async (product: any) => {
+    await addToCart(product._id, 1);
+  };
 
   // Filter products based on search query
   const filteredProducts = searchQuery 
     ? products.filter((product: any) => 
-        (product.name || product.title)?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (product.category || product.tag)?.toLowerCase().includes(searchQuery.toLowerCase())
+        product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.categoryId?.name?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : products;
 
@@ -51,30 +82,11 @@ return (
 
             <div className="absolute left-0 w-full bg-white shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
               <ul className="flex flex-col text-gray-600">
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Accessories (7)
-                </li>
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Beauty & Care (2)
-                </li>
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Jewellery (4)
-                </li>
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Men (7)
-                </li>
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Jackets & Coats
-                </li>
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Shoes (3)
-                </li>
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Watches (4)
-                </li>
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Women (9)
-                </li>
+                {categories.map((category: any) => (
+                  <li key={category._id} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    {category.name}
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -159,7 +171,7 @@ return (
             ) : (
               filteredProducts.map((item: any, index: number) => (
                 <div
-                  key={item.id || item._id || index}
+                  key={item._id || index}
                   className="group bg-white shadow-xl  rounded overflow-hidden"
                 >
                   {/* IMAGE WRAPPER */}
@@ -174,24 +186,27 @@ return (
 
                     {/* Image */}
                     <img
-                      src={item.image || item.img}
-                      alt={item.name || item.title}
+                      src={item.images && item.images.length > 0 ? `http://localhost:7000${item.images[0]}` : 'https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Product'}
+                      alt={item.name}
                       className="w-full h-64 object-cover transition-transform duration-500 group-hover:rotate-2 group-hover:scale-105"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Product';
+                      }}
                     />
 
                     {/* Hover actions */}
                     <div className="absolute inset-x-0 bottom-0 bg-blue-600 text-white flex items-center justify-evenly px-4 py-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                       <span
                         className="flex items-center gap-2 text-sm font-semibold cursor-pointer"
-                        onClick={() => navigate(`/product/${item.id || item._id}`)}
+                        onClick={() => handleAddToCart(item)}
                       >
                         <FaExchangeAlt className="text-lg" />
-                        SELECT OPTIONS
+                       ADD TO CART
                       </span>
 
                       <span
                         className="flex items-center text-sm cursor-pointer"
-                        onClick={() => navigate(`/product/${item.id || item._id}`)}
+                        onClick={() => navigate(`/product/${item._id}`)}
                       >
                         <FaSearch className="text-lg" />
                       </span>
@@ -200,12 +215,12 @@ return (
 
                   {/* CONTENT */}
                   <div className="p-4 flex flex-col gap-2">
-                    <p className="text-sm text-gray-500">{item.category || item.tag}</p>
-                    <h4 className="font-semibold text-gray-800">{item.name || item.title}</h4>
+                    <p className="text-sm text-gray-500">{item.categoryId?.name || 'Category'}</p>
+                    <h4 className="font-semibold text-gray-800">{item.name}</h4>
                     
                     <div className="flex items-center gap-2">
                       <span className="bg-blue-500 text-white px-2 rounded text-sm">
-                        {item.rating || item.rate || 4}
+                        4.5
                         <FaStar className="inline ml-1 mb-0.5" />
                       </span>
                       <span className="text-lg font-semibold text-gray-800">

@@ -1,63 +1,153 @@
-import { createContext, useContext, useState } from "react";
-import type { ReactNode } from "react"; // <--- type-only import
-import type { Product } from "../Model/product";
+import { createContext, useContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import { useAuth } from "./AuthContext";
 
-// Extend Product to include quantity
-export interface CartItem extends Product {
-  qty: number;
+interface CartItem {
+  _id: string;
+  productId: {
+    _id: string;
+    name: string;
+    price: number;
+    images: string[];
+    quantity: number;
+  };
+  quantity: number;
 }
 
-// Define the context type
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: Product) => void;
-  removeFromCart: (id: number) => void;
-  updateQty: (id: number, qty: number) => void;
+  addToCart: (productId: string, quantity?: number) => Promise<void>;
+  removeFromCart: (productId: string) => Promise<void>;
+  updateQty: (productId: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
   totalQty: number;
   totalPrice: number;
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
+  fetchCart: () => Promise<void>;
 }
 
-// Initialize context with proper type
 const CartContext = createContext<CartContextType | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const { user, token } = useAuth();
 
-  const addToCart = (product: Product) => {
-    setItems((prev) => {
-      const found = prev.find((i) => i.id === product.id);
-      if (found) {
-        return prev.map((i) =>
-          i.id === product.id ? { ...i, qty: i.qty + 1 } : i,
-        );
+  useEffect(() => {
+    if (user && user.role === 'customer' && token) {
+      fetchCart();
+    } else {
+      setItems([]);
+    }
+  }, [user, token]);
+
+  const fetchCart = async () => {
+    if (!token || !user || user.role !== 'customer') return;
+    
+    try {
+      const response = await fetch('http://localhost:7000/cart', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setItems(data.items || []);
       }
-      return [...prev, { ...product, qty: 1 }];
-    });
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
+    }
   };
 
-  const removeFromCart = (id: number) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+  const addToCart = async (productId: string, quantity: number = 1) => {
+    if (!token || !user || user.role !== 'customer') {
+      alert('Please login as a customer to add items to cart');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:7000/cart', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId, quantity }),
+      });
+      
+      if (response.ok) {
+        await fetchCart();
+      }
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    }
   };
 
-  const updateQty = (id: number, qty: number) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, qty: Math.max(1, qty) } : item,
-      )
-    );
+  const removeFromCart = async (productId: string) => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`http://localhost:7000/cart/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        await fetchCart();
+      }
+    } catch (error) {
+      console.error('Failed to remove from cart:', error);
+    }
   };
 
-  const totalQty = items.reduce((sum, i) => sum + i.qty, 0);
+  const updateQty = async (productId: string, quantity: number) => {
+    if (!token || quantity < 1) return;
+    
+    try {
+      const response = await fetch(`http://localhost:7000/cart/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quantity }),
+      });
+      
+      if (response.ok) {
+        await fetchCart();
+      }
+    } catch (error) {
+      console.error('Failed to update quantity:', error);
+    }
+  };
 
-  // Convert price to number to fix TS error
-  const totalPrice = items.reduce((sum, i) => {
-    const price = parseFloat(i.price.replace(/[^0-9.]/g, ""));
-    return sum + i.qty * (isNaN(price) ? 0 : price);
-  }, 0);
+  const clearCart = async () => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch('http://localhost:7000/cart', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        setItems([]);
+      }
+    } catch (error) {
+      console.error('Failed to clear cart:', error);
+    }
+  };
+
+  const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = items.reduce((sum, item) => sum + (item.productId.price * item.quantity), 0);
 
   return (
     <CartContext.Provider
@@ -66,11 +156,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
         addToCart,
         removeFromCart,
         updateQty,
+        clearCart,
         totalQty,
         totalPrice,
         isOpen,
         openCart: () => setIsOpen(true),
         closeCart: () => setIsOpen(false),
+        fetchCart,
       }}
     >
       {children}
@@ -78,7 +170,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Custom hook to use cart context safely
 export const useCart = (): CartContextType => {
   const context = useContext(CartContext);
   if (!context) throw new Error("useCart must be used within a CartProvider");
