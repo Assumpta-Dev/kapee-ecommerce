@@ -48,6 +48,8 @@ const VendorDashboard = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [categoriesError, setCategoriesError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -101,15 +103,23 @@ const VendorDashboard = () => {
   };
 
   const fetchCategories = async () => {
+    setCategoriesLoading(true);
+    setCategoriesError('');
+
     try {
       const response = await categoryAPI.getAll();
       setCategories(response.data || []);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
+      setCategories([]);
+      setCategoriesError('Failed to load categories. Please try again.');
+    } finally {
+      setCategoriesLoading(false);
     }
   };
 
-  const handleOpenModal = (product?: Product) => {
+  const handleOpenModal = async (product?: Product) => {
+    await fetchCategories();
     if (product) {
       setEditingProduct(product);
       setFormData({
@@ -518,17 +528,45 @@ const VendorDashboard = () => {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category *
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Category *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => fetchCategories()}
+                      className="text-sm text-blue-600 hover:text-blue-700 disabled:text-gray-400"
+                      disabled={categoriesLoading}
+                    >
+                      {categoriesLoading ? 'Refreshing...' : 'Refresh categories'}
+                    </button>
+                  </div>
+
+                  {categoriesError && (
+                    <p className="mb-2 text-sm text-red-600">{categoriesError}</p>
+                  )}
+
+                  {categories.length === 0 && !categoriesLoading && (
+                    <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                      No categories are available yet. Create categories from the admin side first, then refresh this list.
+                    </div>
+                  )}
+
                   <select
                     name="categoryId"
                     value={formData.categoryId}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
                     required
+                    disabled={categoriesLoading || categories.length === 0}
                   >
-                    <option value="">Select a category</option>
+                    <option value="">
+                      {categoriesLoading
+                        ? 'Loading categories...'
+                        : categories.length === 0
+                          ? 'No categories available'
+                          : 'Select a category'}
+                    </option>
                     {categories.map((category) => (
                       <option key={category._id} value={category._id}>
                         {category.name}
@@ -571,7 +609,7 @@ const VendorDashboard = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || categoriesLoading || categories.length === 0}
                   className="flex-1 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 font-medium"
                 >
                   {loading ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
