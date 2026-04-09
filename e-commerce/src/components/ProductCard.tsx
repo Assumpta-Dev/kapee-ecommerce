@@ -1,5 +1,6 @@
 import { FaHeart, FaStar, FaRandom, FaLayerGroup, FaSearchPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { resolveMediaUrl } from "../utils/api";
 
 interface ProductCardProps {
   product: any;
@@ -20,13 +21,13 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
         <img
           src={
             product.images && product.images.length > 0
-              ? `http://localhost:7000${product.images[0]}`
-              : "https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Product"
+              ? resolveMediaUrl(product.images[0])
+              : product.image || product.img || "https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Product"
           }
           alt={product.name || `Image ${index + 1}`}
           className="w-full h-full object-cover rounded"
           onError={(e) => {
-            e.currentTarget.src = `https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Product`;
+            e.currentTarget.src = product.image || product.img || "https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Product";
           }}
         />
         <FaHeart className="absolute top-2 right-8 text-white stroke-gray-400 stroke-[30]" />

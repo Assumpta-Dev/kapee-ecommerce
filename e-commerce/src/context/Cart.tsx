@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useAuth } from "./AuthContext";
+import { buildApiUrl } from "../utils/api";
 
 interface CartItem {
   _id: string;
@@ -47,7 +48,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (!token || !user || user.role !== 'customer') return;
     
     try {
-      const response = await fetch('http://localhost:7000/cart', {
+      const response = await fetch(buildApiUrl('/cart'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -91,7 +92,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (!token) return;
     
     try {
-      const response = await fetch(`http://localhost:7000/cart/${productId}`, {
+      const response = await fetch(buildApiUrl(`/cart/${productId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FaTrash, FaMinus, FaPlus, FaShoppingCart } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { buildApiUrl, resolveMediaUrl } from '../utils/api';
 
 interface CartItem {
   _id: string;
@@ -37,7 +38,7 @@ const Cart = () => {
 
   const fetchCart = async () => {
     try {
-      const response = await fetch('http://localhost:7000/cart', {
+      const response = await fetch(buildApiUrl('/cart'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ const Cart = () => {
     if (newQuantity < 1) return;
     
     try {
-      const response = await fetch(`http://localhost:7000/cart/${productId}`, {
+      const response = await fetch(buildApiUrl(`/cart/${productId}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -164,7 +165,7 @@ const Cart = () => {
                 <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                   {item.productId.images && item.productId.images.length > 0 ? (
                     <img
-                      src={`http://localhost:7000${item.productId.images[0]}`}
+                      src={resolveMediaUrl(item.productId.images[0])}
                       alt={item.productId.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {

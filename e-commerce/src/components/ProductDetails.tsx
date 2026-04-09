@@ -25,6 +25,7 @@ import SizeSelector from "./SizeSelector";
 import QuantitySelector from "./QuantitySelector";
 import PaymentMethods from "./PaymentMethods";
 import PriceBadge from "./PriceBadge";
+import { resolveMediaUrl } from "../utils/api";
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -71,13 +72,13 @@ export default function ProductPage() {
 
   // Use actual product data - fix image paths
   const productImages = product.images && product.images.length > 0 
-    ? product.images.map((img: string) => `http://localhost:7000${img}`)
+    ? product.images.map((img: string) => resolveMediaUrl(img))
     : [
-        'https://via.placeholder.com/600x600/3B82F6/FFFFFF?text=Product',
+        product.image || product.img || '',
         'https://via.placeholder.com/600x600/3B82F6/FFFFFF?text=Product',
         'https://via.placeholder.com/600x600/3B82F6/FFFFFF?text=Product',
         'https://via.placeholder.com/600x600/3B82F6/FFFFFF?text=Product'
-      ];
+      ].filter(Boolean);
   
   // Dynamic breadcrumb using product's category
   const breadcrumbItems = ["Home", "Shop", product.categoryId?.name || "Category", product.name];
@@ -453,11 +454,11 @@ export default function ProductPage() {
                   />
                   <div className="w-48 border-2 border-gray-200 rounded-lg overflow-hidden">
                     <img
-                      src={item.images && item.images.length > 0 ? `http://localhost:7000${item.images[0]}` : 'https://via.placeholder.com/200x200/3B82F6/FFFFFF?text=Product'}
+                      src={item.images && item.images.length > 0 ? resolveMediaUrl(item.images[0]) : item.image || item.img || 'https://via.placeholder.com/200x200/3B82F6/FFFFFF?text=Product'}
                       alt={item.name || item.title}
                       className="w-full h-48 object-cover"
                       onError={(e) => {
-                        e.currentTarget.src = 'https://via.placeholder.com/200x200/3B82F6/FFFFFF?text=Product';
+                        e.currentTarget.src = item.image || item.img || 'https://via.placeholder.com/200x200/3B82F6/FFFFFF?text=Product';
                       }}
                     />
                   </div>

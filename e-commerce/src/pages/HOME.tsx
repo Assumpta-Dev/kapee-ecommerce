@@ -7,6 +7,8 @@ import ProductCard from "../components/ProductCard";
 import "../App.css";
 import { categoryAPI } from "../api/apiCategoryNew";
 import { productAPI } from "../api/apiProductNew";
+import { resolveMediaUrl } from "../utils/api";
+import { fallbackCategories, fallbackProducts } from "../utils/fallbackData";
 
 const slides = [
   {
@@ -47,10 +49,15 @@ function Home() {
         productAPI.getAll()
       ]);
       
-      setCategories(categoriesRes.data || []);
-      setProducts(productsRes.data || []);
+      const categoryData = categoriesRes.data?.length ? categoriesRes.data : fallbackCategories;
+      const productData = productsRes.data?.length ? productsRes.data : fallbackProducts;
+
+      setCategories(categoryData);
+      setProducts(productData);
     } catch (error) {
       console.error('Failed to fetch data:', error);
+      setCategories(fallbackCategories);
+      setProducts(fallbackProducts);
     } finally {
       setLoading(false);
     }
@@ -309,11 +316,11 @@ function Home() {
               onClick={() => handleCategoryClick(item)}
             >
               <img
-                src={item.image ? `http://localhost:7000${item.image}` : `https://via.placeholder.com/150x150/3B82F6/FFFFFF?text=${encodeURIComponent(item.name)}`}
+                src={resolveMediaUrl(item.image) || item.img || `https://via.placeholder.com/150x150/3B82F6/FFFFFF?text=${encodeURIComponent(item.name)}`}
                 alt={`Image ${index + 1}`}
                 className="w-full h-32 object-cover rounded-full hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
-                  e.currentTarget.src = `https://via.placeholder.com/150x150/3B82F6/FFFFFF?text=${encodeURIComponent(item.name)}`;
+                  e.currentTarget.src = item.img || `https://via.placeholder.com/150x150/3B82F6/FFFFFF?text=${encodeURIComponent(item.name)}`;
                 }}
               />
               <p className="mt-2 text-center text-sm font-medium text-gray-800 hover:text-blue-600 transition-colors">

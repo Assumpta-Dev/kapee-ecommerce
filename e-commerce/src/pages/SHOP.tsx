@@ -7,6 +7,8 @@ import { useState, useEffect } from "react";
 import { productAPI } from "../api/apiProductNew";
 import { categoryAPI } from "../api/apiCategoryNew";
 import { useCart } from "../context/Cart";
+import { resolveMediaUrl } from "../utils/api";
+import { fallbackCategories, fallbackProducts } from "../utils/fallbackData";
 
 
 function SHOP(){
@@ -29,10 +31,12 @@ function SHOP(){
         categoryAPI.getAll()
       ]);
       
-      setProducts(productsRes.data || []);
-      setCategories(categoriesRes.data || []);
+      setProducts(productsRes.data?.length ? productsRes.data : fallbackProducts);
+      setCategories(categoriesRes.data?.length ? categoriesRes.data : fallbackCategories);
     } catch (error) {
       console.error('Failed to fetch data:', error);
+      setProducts(fallbackProducts);
+      setCategories(fallbackCategories);
     } finally {
       setIsLoading(false);
     }
@@ -186,11 +190,11 @@ return (
 
                     {/* Image */}
                     <img
-                      src={item.images && item.images.length > 0 ? `http://localhost:7000${item.images[0]}` : 'https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Product'}
+                      src={item.images && item.images.length > 0 ? resolveMediaUrl(item.images[0]) : item.image || item.img || 'https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Product'}
                       alt={item.name}
                       className="w-full h-64 object-cover transition-transform duration-500 group-hover:rotate-2 group-hover:scale-105"
                       onError={(e) => {
-                        e.currentTarget.src = 'https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Product';
+                        e.currentTarget.src = item.image || item.img || 'https://via.placeholder.com/300x200/3B82F6/FFFFFF?text=Product';
                       }}
                     />
 

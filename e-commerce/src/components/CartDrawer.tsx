@@ -1,6 +1,7 @@
 import { useCart } from "../context/Cart";
 import { FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { resolveMediaUrl } from "../utils/api";
 
 export default function CartDrawer() {
   const { items, totalPrice, isOpen, closeCart, removeFromCart, updateQty } = useCart();
@@ -51,7 +52,7 @@ export default function CartDrawer() {
                 <div key={item._id} className="flex gap-4 border-b border-gray-100 pb-4 last:border-0">
                   <div className="w-20 h-24 flex-shrink-0 border border-gray-200 rounded overflow-hidden">
                     <img 
-                      src={item.productId.images && item.productId.images.length > 0 ? `http://localhost:7000${item.productId.images[0]}` : 'https://via.placeholder.com/80x80/3B82F6/FFFFFF?text=Product'} 
+                      src={item.productId.images && item.productId.images.length > 0 ? resolveMediaUrl(item.productId.images[0]) : 'https://via.placeholder.com/80x80/3B82F6/FFFFFF?text=Product'} 
                       alt={item.productId.name} 
                       className="w-full h-full object-cover" 
                     />
